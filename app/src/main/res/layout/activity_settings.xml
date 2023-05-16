@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".settings.SettingsActivity">
+
+    <TextView
+        android:id="@+id/card_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Carte"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="32dp" />
+
+    <View
+        android:id="@+id/card_separator"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?attr/relativeLayoutBackground"
+        app:layout_constraintTop_toBottomOf="@id/card_title"
+        android:layout_marginTop="8dp" />
+
+    <TextView
+        android:id="@+id/slider_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Ancienneté des déchets (en jours)"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/card_separator"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp" />
+
+    <SeekBar
+        android:id="@+id/custom_seekbar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:max="51"
+        android:progress="51"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/slider_title"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="16dp" />
+
+    <TextView
+        android:id="@+id/slider_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Illimité"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/custom_seekbar"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp" />
+
+    <TextView
+        android:id="@+id/appearance_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Apparence"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/slider_value"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="32dp" />
+
+    <View
+        android:id="@+id/appearance_separator"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?attr/relativeLayoutBackground"
+        app:layout_constraintTop_toBottomOf="@id/appearance_title"
+        android:layout_marginTop="8dp" />
+
+    <TextView
+        android:id="@+id/dark_mode_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Mode sombre"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/appearance_separator"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp" />
+
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/dark_mode_switch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="@id/dark_mode_title"
+        app:layout_constraintBottom_toBottomOf="@id/dark_mode_title"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginEnd="16dp" />
+
+    <TextView
+        android:id="@+id/account_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Compte"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/dark_mode_title"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="32dp" />
+
+    <View
+        android:id="@+id/account_separator"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?attr/relativeLayoutBackground"
+        app:layout_constraintTop_toBottomOf="@id/account_title"
+        android:layout_marginTop="8dp" />
+
+    <TextView
+        android:id="@+id/user_name_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/account_separator"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp" />
+
+    <TextView
+        android:id="@+id/email_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/user_name_text_view"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp" />
+
+    <Button
+        android:id="@+id/logout_button"
+        android:backgroundTint="@color/colorPoubelledroid"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/logout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/email_text_view"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:textColor="?attr/relativeLayoutBackground"
+        android:elevation="0dp"
+        android:background="@drawable/rounded_button"
+        style="@style/CustomButton" />
+
+    <Button
+        android:id="@+id/save_settings_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sauvegarder"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:textColor="?attr/relativeLayoutBackground"
+        android:elevation="0dp"
+        android:background="@drawable/rounded_button"
+        style="?android:attr/borderlessButtonStyle" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

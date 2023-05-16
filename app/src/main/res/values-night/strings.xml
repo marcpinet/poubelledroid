@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Poubelledroid</string>
+    <string name="profile_image">[...]</string>
+    <string name="attachments">Attachements</string>
+    <string name="tri">Tri</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="fermer">Fermer</string>
+    <string name="c_est_nettoy">C\'est nettoyé !</string>
+    <string name="settings">Options</string>
+    <string name="snap">Snap</string>
+    <string name="twitter">Actus</string>
+    <string name="no_tweets">Aucun tweet récent ! Les tweets datant de moins d\'une semaine avec le #poubelledroid s\'afficheront ici.</string>
+    <string name="notification_center">Centre de notifications</string>
+    <string name="login_button_text">Se connecter</string>
+    <string name="register_from_login">Pas encore de compte ? Inscrivez-vous ici !</string>
+    <string name="password_placeholder">Mot de passe</string>
+    <string name="e_mail_pseudo_placeholder">E-mail / Pseudo</string>
+    <string name="forgot_password">Mot de passe oublié ? Cliquez ici !</string>
+    <string name="logo_desc">logo</string>
+    <string name="pseud_placeholder">Pseudo</string>
+    <string name="register_button">S\'inscrire</string>
+    <string name="login_from_register">Déjà un compte ? Connectez-vous ici !</string>
+    <string name="logout">Se déconnecter</string>
+    <string name="username">Nom d\'utilisateur</string>
+    <string name="e_mail_placeholder">E-mail</string>
+    <string name="description">Description</string>
+    <string name="pic_desc">Description ou contexte de la photo</string>
+    <string name="continue_button_text">Continuer</string>
+    <string name="post_button">Signaler</string>
+    <string name="refresh_map">refresh</string>
+    <string name="arrow_to_show_that_there_are_more_images">More...</string>
+    <string name="send_button">Envoyer</string>
+    <string name="d_tails_relatifs_au_nettoyage">Détails relatifs au nettoyage</string>
+    <string name="approuver">Approuver</string>
+    <string name="rejeter">Rejeter</string>
+    <string name="image">image</string>
+    <string name="historique">Historique</string>
+</resources>

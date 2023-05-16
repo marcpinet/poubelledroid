@@ -1,0 +1,85 @@
+plugins {
+    id 'com.android.application'
+    id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
+    id 'com.google.gms.google-services'
+}
+
+android {
+    namespace 'com.polytech.poubelledroid'
+    compileSdk 33
+    packagingOptions {
+        resources {
+            excludes += ['META-INF/DEPENDENCIES']
+        }
+    }
+
+    defaultConfig {
+        applicationId "com.polytech.poubelledroid"
+        minSdk 29
+        targetSdk 33
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        vectorDrawables.useSupportLibrary = true
+
+        def env = new Properties()
+        env.load(new FileInputStream(file("../.env")))
+
+        buildConfigField("String", "FIREBASE_API_KEY", "\"${env['FIREBASE_API_KEY']}\"")
+        buildConfigField("String", "TWITTER_BEARER_TOKEN", "\"${env['TWITTER_BEARER_TOKEN']}\"")
+        resValue "string", "googleMapsApiKey", "\"${env['GOOGLE_MAPS_API_KEY']}\""
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+preBuild.dependsOn rootProject.tasks.findByName('generateGoogleServicesJson')
+afterEvaluate {
+    tasks.matching { it.name.startsWith('process') && it.name.endsWith('GoogleServices') }.each { targetTask ->
+        targetTask.dependsOn rootProject.tasks.findByName('generateGoogleServicesJson')
+    }
+}
+
+dependencies {
+
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.8.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    
+    implementation 'androidx.core:core:1.0.0'
+    implementation(platform("com.squareup.okhttp3:okhttp-bom:4.10.0"))
+
+    implementation("com.squareup.okhttp3:okhttp")
+    implementation("com.squareup.okhttp3:logging-interceptor")
+
+    implementation 'com.github.bumptech.glide:glide:4.15.1'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.15.1'
+
+    implementation 'com.google.android.gms:play-services-maps:18.1.0'
+    implementation platform('com.google.firebase:firebase-bom:31.5.0')
+    implementation 'com.google.firebase:firebase-analytics'
+    implementation 'com.google.firebase:firebase-auth'
+    implementation 'com.google.firebase:firebase-firestore'
+    implementation 'com.google.firebase:firebase-database'
+    implementation 'com.google.firebase:firebase-storage'
+    implementation 'org.mindrot:jbcrypt:0.4'
+    implementation 'com.google.android.gms:play-services-location:21.0.1'
+    implementation 'com.google.firebase:firebase-messaging'
+    implementation 'com.google.firebase:firebase-installations'
+    implementation 'com.google.firebase:firebase-functions'
+}

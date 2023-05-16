@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+# Run gradle spotless on all staged files
+
+# Get all staged files
+staged_files=$(git diff --cached --name-only --diff-filter=ACM)
+
+# Exit if no files are staged
+if [ -z "$staged_files" ]; then
+  exit 0
+fi
+
+# Run gradle spotless
+./gradlew spotlessApply
+
+# Add all staged files
+echo "$staged_files" | xargs git add
+
+# Exit with success
+exit 0
