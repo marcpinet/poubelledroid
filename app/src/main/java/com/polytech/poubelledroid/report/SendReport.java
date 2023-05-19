@@ -184,7 +184,15 @@ public class SendReport extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK) {
-            Bitmap photo = BitmapFactory.decodeFile(currentPhotoPath);
+            Bitmap photo = null;
+            try {
+                photo = BitmapFactory.decodeFile(currentPhotoPath);
+            } catch (OutOfMemoryError e) {
+                // Scale down the image
+                BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
+                bitmapOptions.inSampleSize = 2;
+                photo = BitmapFactory.decodeFile(currentPhotoPath, bitmapOptions);
+            }
             if (photo == null) {
                 finish();
                 return;
