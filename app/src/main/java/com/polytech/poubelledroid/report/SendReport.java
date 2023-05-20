@@ -189,6 +189,8 @@ public class SendReport extends AppCompatActivity {
                 photo = BitmapFactory.decodeFile(currentPhotoPath);
             } catch (OutOfMemoryError e) {
                 // Scale down the image
+                Toast.makeText(this, "Image trop lourde, elle sera compressée", Toast.LENGTH_LONG)
+                        .show();
                 BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
                 bitmapOptions.inSampleSize = 2;
                 photo = BitmapFactory.decodeFile(currentPhotoPath, bitmapOptions);
@@ -220,7 +222,11 @@ public class SendReport extends AppCompatActivity {
             outputStream.flush();
             outputStream.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            Toast.makeText(
+                            this,
+                            "Erreur lors de la compression ou de la sauvegarde de l'image",
+                            Toast.LENGTH_SHORT)
+                    .show();
         }
     }
 
@@ -254,7 +260,11 @@ public class SendReport extends AppCompatActivity {
                     break;
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            Toast.makeText(
+                            this,
+                            "Erreur lors de la récupération de l'orientation de l'image",
+                            Toast.LENGTH_SHORT)
+                    .show();
         }
         return rotation;
     }
