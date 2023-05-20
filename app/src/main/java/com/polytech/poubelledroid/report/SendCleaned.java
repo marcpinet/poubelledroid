@@ -143,6 +143,8 @@ public class SendCleaned extends AppCompatActivity {
                 photo = BitmapFactory.decodeFile(currentPhotoPath);
             } catch (OutOfMemoryError e) {
                 // Scale down the image
+                Toast.makeText(this, "Image trop lourde, elle sera compressée", Toast.LENGTH_LONG)
+                        .show();
                 BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
                 bitmapOptions.inSampleSize = 2;
                 photo = BitmapFactory.decodeFile(currentPhotoPath, bitmapOptions);
