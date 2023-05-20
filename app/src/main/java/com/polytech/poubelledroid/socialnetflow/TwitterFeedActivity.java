@@ -149,7 +149,7 @@ public class TwitterFeedActivity extends AppCompatActivity {
                 int likeCount = publicMetrics.getInt("like_count");
 
                 Tweet tweet =
-                        new Tweet(
+                        TweetFactory.createTweet(
                                 text,
                                 username,
                                 profileImageUrl,
