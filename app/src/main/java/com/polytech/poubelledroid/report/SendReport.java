@@ -2,7 +2,6 @@ package com.polytech.poubelledroid.report;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -36,6 +35,7 @@ import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.polytech.poubelledroid.R;
+import com.polytech.poubelledroid.fields.FirebaseStorageFields;
 import com.polytech.poubelledroid.fields.WasteFields;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -62,7 +62,7 @@ public class SendReport extends AppCompatActivity {
                 "🗄 Meuble abandonné",
                 "🗑 Autre type de déchet"
             };
-    private ProgressDialog progressDialog;
+    private AlertDialog loadingDialog;
 
     @SuppressWarnings("java:S1874")
     @Override
@@ -88,10 +88,10 @@ public class SendReport extends AppCompatActivity {
         dropdownLayout = findViewById(R.id.dropdown_layout);
         descriptionEditText = findViewById(R.id.description);
 
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setCancelable(false);
-        progressDialog.setIndeterminate(true);
-        progressDialog.setMessage("Envoi en cours...");
+        AlertDialog.Builder loadingDialogBuilder = new AlertDialog.Builder(this);
+        loadingDialogBuilder.setView(R.layout.dialog_loading);
+        loadingDialog = loadingDialogBuilder.create();
+        loadingDialog.setMessage("Envoi en cours...");
 
         setupDropdown();
     }
@@ -110,7 +110,7 @@ public class SendReport extends AppCompatActivity {
             return;
         }
 
-        progressDialog.show();
+        loadingDialog.show();
         this.uploadImageAndData();
     }
 
@@ -274,7 +274,8 @@ public class SendReport extends AppCompatActivity {
         StorageReference storageReference = FirebaseStorage.getInstance().getReference();
         Uri fileUri = Uri.fromFile(new File(currentPhotoPath));
         StorageReference imageRef =
-                storageReference.child("images/" + fileUri.getLastPathSegment());
+                storageReference.child(
+                        FirebaseStorageFields.WASTE_STORAGE_PATH + fileUri.getLastPathSegment());
 
         imageRef.putFile(fileUri)
                 .addOnSuccessListener(
@@ -293,8 +294,9 @@ public class SendReport extends AppCompatActivity {
                                                                     currentPosition.latitude,
                                                                     currentPosition.longitude);
                                                     String description =
-                                                            descriptionEditText
-                                                                    .getText()
+                                                            Objects.requireNonNull(
+                                                                            descriptionEditText
+                                                                                    .getText())
                                                                     .toString();
                                                     Map<String, Object> wasteData = new HashMap<>();
                                                     wasteData.put(WasteFields.USER_ID, userId);
@@ -318,17 +320,15 @@ public class SendReport extends AppCompatActivity {
                                                             WasteFields.DATE,
                                                             FieldValue.serverTimestamp());
 
-                                                    db.collection("waste")
+                                                    db.collection(WasteFields.COLLECTION_NAME)
                                                             .add(wasteData)
                                                             .addOnSuccessListener(
                                                                     documentReference -> {
-                                                                        // Set id of document to the
-                                                                        // document id
                                                                         documentReference.update(
                                                                                 WasteFields.ID,
                                                                                 documentReference
                                                                                         .getId());
-                                                                        progressDialog.dismiss();
+                                                                        loadingDialog.dismiss();
                                                                         Toast.makeText(
                                                                                         this,
                                                                                         "Votre rapport a été envoyé avec succès",
@@ -339,7 +339,7 @@ public class SendReport extends AppCompatActivity {
                                                                     })
                                                             .addOnFailureListener(
                                                                     e -> {
-                                                                        progressDialog.dismiss();
+                                                                        loadingDialog.dismiss();
                                                                         Toast.makeText(
                                                                                         this,
                                                                                         "Erreur lors de l'authentification",
@@ -356,7 +356,7 @@ public class SendReport extends AppCompatActivity {
                                             "Erreur durant l'envoi de la photo vers nos serveurs",
                                             Toast.LENGTH_SHORT)
                                     .show();
-                            progressDialog.dismiss();
+                            loadingDialog.dismiss();
                         });
     }
 
@@ -370,7 +370,7 @@ public class SendReport extends AppCompatActivity {
 
                     @Override
                     public void onLocationError() {
-                        progressDialog.dismiss();
+                        loadingDialog.dismiss();
                         Toast.makeText(
                                         SendReport.this,
                                         "Erreur lors de la récupération de votre géolocalisation",

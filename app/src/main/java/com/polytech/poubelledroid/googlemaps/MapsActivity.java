@@ -3,7 +3,6 @@ package com.polytech.poubelledroid.googlemaps;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,9 +11,6 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.location.Address;
-import android.location.Geocoder;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
@@ -48,7 +44,6 @@ import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -64,13 +59,10 @@ import com.polytech.poubelledroid.report.SendReport;
 import com.polytech.poubelledroid.settings.SettingsActivity;
 import com.polytech.poubelledroid.settings.UserSettings;
 import com.polytech.poubelledroid.socialnetflow.TwitterFeedActivity;
-import java.io.IOException;
+import com.polytech.poubelledroid.utils.WasteUtils;
+import com.polytech.poubelledroid.utils.geocoder.LocationResultListener;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
     private final ArrayList<Waste> currentWastes = new ArrayList<>();
@@ -79,18 +71,18 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private FusedLocationProviderClient mFusedLocationProviderClient;
 
     public static FloatingActionButton fabNotificationCenter;
-    private FloatingActionButton refreshButton;
-    private FloatingActionButton settingsButton;
-
-    private Button actusButton;
-    private Button snapButton;
-    private Button historySettings;
-    private ProgressDialog progressDialog;
+    private AlertDialog loadingDialog;
 
     private ActivityResultLauncher<Intent> settingsLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Button actusButton;
+        Button snapButton;
+        Button historySettings;
+        FloatingActionButton settingsButton;
+        FloatingActionButton refreshButton;
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         SupportMapFragment mapFragment =
@@ -108,7 +100,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         refreshButton = findViewById(R.id.fab_refresh);
         refreshButton.setOnClickListener(
                 v -> {
-                    progressDialog.show();
+                    loadingDialog.show();
                     loadTrashData();
                 });
 
@@ -119,14 +111,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         snapButton = findViewById(R.id.snap);
         historySettings = findViewById(R.id.history);
 
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setCancelable(false);
-        progressDialog.setIndeterminate(true);
-        progressDialog.setMessage("Actualisation en cours...");
+        AlertDialog.Builder loadingDialogBuilder = new AlertDialog.Builder(this);
+        loadingDialogBuilder.setView(R.layout.dialog_loading);
+        loadingDialog = loadingDialogBuilder.create();
+        loadingDialog.setMessage("Actualisation des déchets en cours...");
 
         actusButton.setOnClickListener(v -> openTwitterActivity());
         historySettings.setOnClickListener(v -> openHistoryActivity());
-        snapButton.setOnClickListener(v -> openCameraActivity());
+        snapButton.setOnClickListener(v -> openSendReportActivity());
 
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -134,16 +126,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 registerForActivityResult(
                         new ActivityResultContracts.StartActivityForResult(),
                         result -> {
-                            if (result.getResultCode() == Activity.RESULT_OK) {
-                                loadTrashData();
-                            }
+                            if (result.getResultCode() == Activity.RESULT_OK) loadTrashData();
                         });
     }
 
     public static void getLocationOfCleaningRequestFromTrashId(
             String trashId, LocationResultListener resultListener) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("waste")
+        db.collection(WasteFields.COLLECTION_NAME)
                 .whereEqualTo(WasteFields.ID, trashId)
                 .get()
                 .addOnCompleteListener(
@@ -154,64 +144,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                     GeoPoint location = document.getGeoPoint("coordinates");
                                     resultListener.onLocationResult(location);
                                 }
-                            } else {
+                            } else
                                 Log.d(
                                         "MapsActivity",
                                         "Error getting documents: ",
                                         task.getException());
-                            }
                         });
-    }
-
-    public static void getAddressFromCoordinatesTiramisu(
-            Context context,
-            double latitude,
-            double longitude,
-            GeocodeResultListener resultListener) {
-        Geocoder geocoder = new Geocoder(context, Locale.getDefault());
-        Geocoder.GeocodeListener geocodeListener = null;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            geocodeListener =
-                    new Geocoder.GeocodeListener() {
-                        @Override
-                        public void onGeocode(@NonNull List<Address> addresses) {
-                            if (!addresses.isEmpty()) {
-                                Address address = addresses.get(0);
-                                String locationName =
-                                        address.getLocality() + ", " + address.getCountryName();
-                                resultListener.onGeocodeResult(locationName);
-                            } else {
-                                resultListener.onGeocodeResult("Unknown location");
-                            }
-                        }
-
-                        @Override
-                        public void onError(String message) {
-                            resultListener.onGeocodeResult("Unknown location");
-                        }
-                    };
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            geocoder.getFromLocation(latitude, longitude, 1, geocodeListener);
-        } else {
-            resultListener.onGeocodeResult("Unknown location");
-        }
-    }
-
-    public static String getAddressFromCoordinates(
-            Context context, double latitude, double longitude) {
-        Geocoder geocoder = new Geocoder(context, Locale.getDefault());
-        try {
-            List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
-            if (addresses != null && !addresses.isEmpty()) {
-                Address address = addresses.get(0);
-                return address.getLocality() + ", " + address.getCountryName();
-            }
-        } catch (IOException e) {
-            Log.e("MapsActivity", "Error getting address from coordinates: ", e);
-        }
-        return "Unknown location";
     }
 
     @Override
@@ -228,7 +166,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         startActivity(intent);
     }
 
-    private void openCameraActivity() {
+    private void openSendReportActivity() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.CAMERA}, 1);
@@ -271,36 +209,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 getSharedPreferences(SettingsActivity.SHAREDPREFS, MODE_PRIVATE);
         int maxDays = sharedPreferences.getInt(UserSettings.WASTE_DAYS_OLD.name(), 51);
 
-        db.collection("waste")
+        db.collection(WasteFields.COLLECTION_NAME)
                 .get()
                 .addOnCompleteListener(
                         task -> {
                             if (task.isSuccessful()) {
                                 for (QueryDocumentSnapshot document :
                                         Objects.requireNonNull(task.getResult())) {
-                                    Timestamp creationDate =
-                                            document.getTimestamp(WasteFields.DATE);
-                                    Timestamp today = new Timestamp(new Date());
-
-                                    long diffInMillis =
-                                            today.toDate().getTime()
-                                                    - creationDate.toDate().getTime();
-                                    long diffInDays = TimeUnit.MILLISECONDS.toDays(diffInMillis);
-
-                                    if (maxDays != 51 && diffInDays > maxDays) {
-                                        continue;
-                                    }
-
-                                    int type =
-                                            Objects.requireNonNull(
-                                                            document.getLong(WasteFields.TYPE))
-                                                    .intValue();
-
-                                    boolean cleaned =
-                                            Objects.requireNonNull(
-                                                    document.getBoolean(WasteFields.CLEANED));
-
-                                    if (type == 0 || cleaned) {
+                                    if (!WasteUtils.isValidWaste(document, maxDays)) {
                                         continue;
                                     }
 
@@ -310,6 +226,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                     String description =
                                             document.getString(WasteFields.DESCRIPTION);
                                     String id = document.getString(WasteFields.USER_ID);
+                                    int type =
+                                            Objects.requireNonNull(
+                                                            document.getLong(WasteFields.TYPE))
+                                                    .intValue();
 
                                     if (coordinates != null) {
                                         Waste waste =
@@ -325,7 +245,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                         currentWastes.add(waste);
                                     }
                                 }
-                                progressDialog.dismiss();
                                 addMarkersToMap();
                             } else {
                                 Toast.makeText(
@@ -333,10 +252,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                                 "Erreur lors du chargement des données",
                                                 Toast.LENGTH_SHORT)
                                         .show();
-                                progressDialog.dismiss();
                             }
+                            loadingDialog.dismiss();
                         });
-        progressDialog.dismiss();
     }
 
     private BitmapDescriptor resizeBitmap(int drawableId, int width, int height) {

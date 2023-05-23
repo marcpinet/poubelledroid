@@ -23,25 +23,25 @@ import java.util.Objects;
 
 public class SettingsActivity extends AppCompatActivity {
 
-    private TextView userNameTextView;
-    private TextView emailTextView;
-    private Button logoutButton;
-    private FirebaseAuth mAuth;
-    private FirebaseFirestore db;
     private SwitchMaterial darkModeSwitch;
     private SeekBar seekBar;
     private TextView sliderValue;
-    private Button saveButton;
 
     public static String username = null;
     public static String email = null;
     public static int darkThemeValue = 0;
     public static int wasteDaysOldValue = 0;
 
-    public static String SHAREDPREFS = "settings";
+    public static final String SHAREDPREFS = "settings";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Button saveButton;
+        FirebaseFirestore db;
+        FirebaseAuth mAuth;
+        Button logoutButton;
+        TextView emailTextView;
+        TextView userNameTextView;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
@@ -57,7 +57,7 @@ public class SettingsActivity extends AppCompatActivity {
         if (SettingsActivity.username == null) {
             FirebaseUser user = mAuth.getCurrentUser();
             if (user != null) {
-                db.collection("users")
+                db.collection(UsersFields.COLLECTION_NAME)
                         .document(user.getUid())
                         .get()
                         .addOnCompleteListener(

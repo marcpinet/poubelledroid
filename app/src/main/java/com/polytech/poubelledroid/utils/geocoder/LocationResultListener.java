@@ -1,4 +1,4 @@
-package com.polytech.poubelledroid.googlemaps;
+package com.polytech.poubelledroid.utils.geocoder;
 
 import com.google.firebase.firestore.GeoPoint;
 

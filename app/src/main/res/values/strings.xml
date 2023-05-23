@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Poubelledroid</string>
     <string name="profile_image">[...]</string>
@@ -7,8 +8,8 @@
     <string name="fermer">Fermer</string>
     <string name="c_est_nettoy">C\'est nettoyé !</string>
     <string name="settings">Options</string>
-    <string name="snap">Snap</string>
-    <string name="twitter">Actus</string>
+    <string name="snap">📸 Signaler</string>
+    <string name="twitter">📰 Actus</string>
     <string name="no_tweets">Aucun tweet récent ! Les tweets datant de moins d\'une semaine avec le #poubelledroid s\'afficheront ici.</string>
     <string name="notification_center">Centre de notifications</string>
     <string name="login_button_text">Se connecter</string>
@@ -34,5 +35,5 @@
     <string name="approuver">Approuver</string>
     <string name="rejeter">Rejeter</string>
     <string name="image">image</string>
-    <string name="historique">Historique</string>
+    <string name="historique">📜 Historique</string>
 </resources>

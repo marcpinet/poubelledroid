@@ -23,14 +23,6 @@ public class Notification {
         this.timestamp = timestamp;
     }
 
-    public Notification(String title, String message, Bitmap image, long timestamp) {
-        this.id = (int) System.currentTimeMillis();
-        this.title = title;
-        this.message = message;
-        this.image = image;
-        this.timestamp = timestamp;
-    }
-
     public Notification(String title, String message, Bitmap image) {
         this.id = (int) System.currentTimeMillis();
         this.title = title;

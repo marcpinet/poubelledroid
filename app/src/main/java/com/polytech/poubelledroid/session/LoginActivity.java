@@ -2,7 +2,6 @@ package com.polytech.poubelledroid.session;
 
 import android.Manifest;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -29,17 +28,15 @@ public class LoginActivity extends AppCompatActivity {
 
     private EditText emailOrPseudoEditText;
     private EditText passwordEditText;
-    private Button loginButton;
-    private TextView registerTextView;
-    private TextView forgotPasswordTextView;
+
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
-    private ProgressDialog progressDialog;
+    private AlertDialog loadingDialog;
     private final ActivityResultLauncher<String> requestPermissionLauncher =
             registerForActivityResult(
                     new ActivityResultContracts.RequestPermission(),
                     isGranted -> {
-                        if (!isGranted) {
+                        if (Boolean.FALSE.equals(isGranted)) {
                             Toast.makeText(
                                             this,
                                             "Vous ne recevrez des notifications que via le centre interne de l'app",
@@ -50,6 +47,9 @@ public class LoginActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Button loginButton;
+        TextView registerTextView;
+        TextView forgotPasswordTextView;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
@@ -75,19 +75,17 @@ public class LoginActivity extends AppCompatActivity {
         // Ask for notification permission
         askForNotification();
 
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setCancelable(false);
-        progressDialog.setIndeterminate(true);
-        progressDialog.setMessage("Connexion en cours...");
+        AlertDialog.Builder loadingDialogBuilder = new AlertDialog.Builder(this);
+        loadingDialogBuilder.setView(R.layout.dialog_loading);
+        loadingDialog = loadingDialogBuilder.create();
+        loadingDialog.setMessage("Connexion en cours...");
     }
 
     private void askForNotification() {
         // This is only necessary for API level >= 33 (TIRAMISU)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
-                    == PackageManager.PERMISSION_GRANTED) {
-                return;
-            } else {
+                    != PackageManager.PERMISSION_GRANTED) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setMessage("Voulez-vous activer les notifications ?");
                 builder.setPositiveButton(
@@ -115,11 +113,11 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        progressDialog.show();
+        loadingDialog.show();
         if (emailOrPseudo.contains("@")) {
             signInWithEmailAndPassword(emailOrPseudo, password);
         } else {
-            db.collection("users")
+            db.collection(UsersFields.COLLECTION_NAME)
                     .whereEqualTo(UsersFields.USERNAME, emailOrPseudo)
                     .get()
                     .addOnCompleteListener(
@@ -133,7 +131,7 @@ public class LoginActivity extends AppCompatActivity {
                                                     .getString(UsersFields.EMAIL);
                                     signInWithEmailAndPassword(email, password);
                                 } else {
-                                    progressDialog.dismiss();
+                                    loadingDialog.dismiss();
                                     Toast.makeText(
                                                     LoginActivity.this,
                                                     "Erreur de connexion",
@@ -153,7 +151,6 @@ public class LoginActivity extends AppCompatActivity {
                                 FirebaseUser user = mAuth.getCurrentUser();
                                 if (user != null && user.isEmailVerified()) {
                                     FirebaseUtils.updateFcmTokenIfNeeded();
-                                    progressDialog.dismiss();
                                     Toast.makeText(
                                                     LoginActivity.this,
                                                     "Connexion réussie",
@@ -162,9 +159,10 @@ public class LoginActivity extends AppCompatActivity {
                                     Intent intent =
                                             new Intent(LoginActivity.this, MapsActivity.class);
                                     startActivity(intent);
+                                    loadingDialog.dismiss();
                                     finish();
                                 } else {
-                                    progressDialog.dismiss();
+                                    loadingDialog.dismiss();
                                     Toast.makeText(
                                                     LoginActivity.this,
                                                     "Veuillez vérifier votre adresse e-mail",
@@ -172,7 +170,7 @@ public class LoginActivity extends AppCompatActivity {
                                             .show();
                                 }
                             } else {
-                                progressDialog.dismiss();
+                                loadingDialog.dismiss();
                                 Toast.makeText(
                                                 LoginActivity.this,
                                                 "Erreur de connexion",
@@ -194,20 +192,20 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        progressDialog.show();
+        loadingDialog.show();
         if (emailOrPseudo.contains("@")) {
             mAuth.sendPasswordResetEmail(emailOrPseudo)
                     .addOnCompleteListener(
                             task -> {
                                 if (task.isSuccessful()) {
-                                    progressDialog.dismiss();
+                                    loadingDialog.dismiss();
                                     Toast.makeText(
                                                     LoginActivity.this,
                                                     "Un e-mail de réinitialisation a été envoyé",
                                                     Toast.LENGTH_SHORT)
                                             .show();
                                 } else {
-                                    progressDialog.dismiss();
+                                    loadingDialog.dismiss();
                                     Toast.makeText(
                                                     LoginActivity.this,
                                                     "Erreur lors de l'envoi de l'e-mail de réinitialisation",
@@ -216,7 +214,7 @@ public class LoginActivity extends AppCompatActivity {
                                 }
                             });
         } else {
-            db.collection("users")
+            db.collection(UsersFields.COLLECTION_NAME)
                     .whereEqualTo(UsersFields.USERNAME, emailOrPseudo)
                     .get()
                     .addOnCompleteListener(
@@ -227,18 +225,19 @@ public class LoginActivity extends AppCompatActivity {
                                                     .getDocuments()
                                                     .get(0)
                                                     .getString(UsersFields.EMAIL);
+                                    assert email != null;
                                     mAuth.sendPasswordResetEmail(email)
                                             .addOnCompleteListener(
                                                     task1 -> {
                                                         if (task1.isSuccessful()) {
-                                                            progressDialog.dismiss();
+                                                            loadingDialog.dismiss();
                                                             Toast.makeText(
                                                                             LoginActivity.this,
                                                                             "Un e-mail de réinitialisation a été envoyé",
                                                                             Toast.LENGTH_SHORT)
                                                                     .show();
                                                         } else {
-                                                            progressDialog.dismiss();
+                                                            loadingDialog.dismiss();
                                                             Toast.makeText(
                                                                             LoginActivity.this,
                                                                             "Le mail n'a pas pu être envoyé",
@@ -247,7 +246,7 @@ public class LoginActivity extends AppCompatActivity {
                                                         }
                                                     });
                                 } else {
-                                    progressDialog.dismiss();
+                                    loadingDialog.dismiss();
                                     Toast.makeText(
                                                     LoginActivity.this,
                                                     "Aucun email associé à ce pseudo",

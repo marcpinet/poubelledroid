@@ -12,6 +12,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.polytech.poubelledroid.R;
+import com.polytech.poubelledroid.fields.LocalNotificationFields;
 import com.polytech.poubelledroid.report.CleanBroadcastReceiver;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -44,7 +45,7 @@ public class NotificationAdapter extends ArrayAdapter<Notification> {
 
         if (!notification.getExtras().isEmpty()) {
             checkCleaningRequestStatus(
-                    notification.getExtras().get("cleaningRequestId"),
+                    notification.getExtras().get(LocalNotificationFields.CLEANING_REQUEST_ID),
                     status -> {
                         if (status == 0) {
                             actionButtonsContainer.setVisibility(View.VISIBLE);
@@ -55,9 +56,17 @@ public class NotificationAdapter extends ArrayAdapter<Notification> {
                                         rejectText.setEnabled(false);
 
                                         CleanBroadcastReceiver.callSendNotificationToCleaner(
-                                                notification.getExtras().get("cleaningRequestId"),
-                                                notification.getExtras().get("trashId"),
-                                                notification.getExtras().get("cleanerId"),
+                                                notification
+                                                        .getExtras()
+                                                        .get(
+                                                                LocalNotificationFields
+                                                                        .CLEANING_REQUEST_ID),
+                                                notification
+                                                        .getExtras()
+                                                        .get(LocalNotificationFields.TRASH_ID),
+                                                notification
+                                                        .getExtras()
+                                                        .get(LocalNotificationFields.CLEANER_ID),
                                                 true,
                                                 () -> {
                                                     Toast.makeText(
@@ -77,9 +86,17 @@ public class NotificationAdapter extends ArrayAdapter<Notification> {
                                         rejectText.setEnabled(false);
 
                                         CleanBroadcastReceiver.callSendNotificationToCleaner(
-                                                notification.getExtras().get("cleaningRequestId"),
-                                                notification.getExtras().get("trashId"),
-                                                notification.getExtras().get("cleanerId"),
+                                                notification
+                                                        .getExtras()
+                                                        .get(
+                                                                LocalNotificationFields
+                                                                        .CLEANING_REQUEST_ID),
+                                                notification
+                                                        .getExtras()
+                                                        .get(LocalNotificationFields.TRASH_ID),
+                                                notification
+                                                        .getExtras()
+                                                        .get(LocalNotificationFields.CLEANER_ID),
                                                 false,
                                                 () -> {
                                                     Toast.makeText(
