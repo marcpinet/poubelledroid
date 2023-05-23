@@ -1,6 +1,6 @@
 package com.polytech.poubelledroid.notificationcenter;
 
-import android.app.ProgressDialog;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -15,6 +15,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.polytech.poubelledroid.R;
+import com.polytech.poubelledroid.fields.LocalNotificationFields;
 import com.polytech.poubelledroid.utils.ImgUtils;
 import com.polytech.poubelledroid.utils.NotificationUtils;
 import java.util.ArrayList;
@@ -31,7 +32,7 @@ public class NotificationCenterActivity extends AppCompatActivity
         implements AdapterView.OnItemLongClickListener {
 
     private NotificationAdapter adapter;
-    private ProgressDialog progressDialog;
+    private AlertDialog loadingDialog;
 
     private static ArrayList<Notification> notifications;
 
@@ -50,17 +51,17 @@ public class NotificationCenterActivity extends AppCompatActivity
         sortButton.setOnClickListener(v -> showSortDialog());
     }
 
-    private void showProgressDialog(boolean show) {
+    private void showLoadingDialog(boolean show) {
         if (show) {
-            progressDialog = new ProgressDialog(this);
-            progressDialog.setMessage("Chargement des notifications...");
-            progressDialog.setIndeterminate(true);
-            progressDialog.setCancelable(false);
-            progressDialog.show();
+            AlertDialog.Builder loadingDialogBuilder = new AlertDialog.Builder(this);
+            loadingDialogBuilder.setView(R.layout.dialog_loading);
+            loadingDialog = loadingDialogBuilder.create();
+            loadingDialog.setMessage("Actualisation des notifications en cours...");
+            loadingDialog.show();
         } else {
-            if (progressDialog != null) {
-                progressDialog.dismiss();
-                progressDialog = null;
+            if (loadingDialog != null) {
+                loadingDialog.dismiss();
+                loadingDialog = null;
             }
         }
     }
@@ -140,22 +141,27 @@ public class NotificationCenterActivity extends AppCompatActivity
                 JSONArray jsonArray = new JSONArray(notificationListJson);
                 for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject jsonObject = jsonArray.getJSONObject(i);
-                    int id = jsonObject.getInt("id");
-                    String title = jsonObject.getString("title");
-                    String message = jsonObject.getString("message");
-                    long timestamp = jsonObject.getLong("timestamp");
-                    String imageBase64 = jsonObject.optString("image", null);
+                    int id = jsonObject.getInt(LocalNotificationFields.ID);
+                    String title = jsonObject.getString(LocalNotificationFields.TITLE);
+                    String message = jsonObject.getString(LocalNotificationFields.MESSAGE);
+                    long timestamp = jsonObject.getLong(LocalNotificationFields.TIMESTAMP);
+                    String imageBase64 = jsonObject.optString(LocalNotificationFields.IMAGE, null);
                     Bitmap image =
                             imageBase64 != null ? ImgUtils.base64ToBitmap(imageBase64) : null;
 
                     Notification notif = new Notification(id, title, message, image, timestamp);
 
                     // If it has extras
-                    JSONObject extrasJson = jsonObject.optJSONObject("extras");
+                    JSONObject extrasJson =
+                            jsonObject.optJSONObject(LocalNotificationFields.EXTRAS);
                     if (extrasJson != null) {
-                        String trashId = extrasJson.optString("trashId", null);
-                        String cleanerId = extrasJson.optString("cleanerId", null);
-                        String cleaningRequestId = extrasJson.optString("cleaningRequestId", null);
+                        String trashId =
+                                extrasJson.optString(LocalNotificationFields.TRASH_ID, null);
+                        String cleanerId =
+                                extrasJson.optString(LocalNotificationFields.CLEANER_ID, null);
+                        String cleaningRequestId =
+                                extrasJson.optString(
+                                        LocalNotificationFields.CLEANING_REQUEST_ID, null);
 
                         if (trashId != null
                                 && cleanerId != null
@@ -208,11 +214,12 @@ public class NotificationCenterActivity extends AppCompatActivity
         editor.apply();
     }
 
+    @SuppressLint("StaticFieldLeak")
     private class LoadNotificationsTask extends AsyncTask<Void, Void, List<Notification>> {
 
         @Override
         protected void onPreExecute() {
-            showProgressDialog(true);
+            showLoadingDialog(true);
         }
 
         @Override
@@ -229,15 +236,16 @@ public class NotificationCenterActivity extends AppCompatActivity
             ListView listView = findViewById(R.id.notification_list_view);
             listView.setAdapter(adapter);
             listView.setOnItemLongClickListener(NotificationCenterActivity.this);
-            showProgressDialog(false);
+            showLoadingDialog(false);
         }
     }
 
+    @SuppressLint("StaticFieldLeak")
     private class RemoveNotificationTask extends AsyncTask<Integer, Void, Void> {
 
         @Override
         protected void onPreExecute() {
-            showProgressDialog(true);
+            showLoadingDialog(true);
         }
 
         @Override
@@ -251,7 +259,7 @@ public class NotificationCenterActivity extends AppCompatActivity
         @Override
         protected void onPostExecute(Void result) {
             adapter.notifyDataSetChanged();
-            showProgressDialog(false);
+            showLoadingDialog(false);
             Toast.makeText(
                             NotificationCenterActivity.this,
                             "Notification supprimée",

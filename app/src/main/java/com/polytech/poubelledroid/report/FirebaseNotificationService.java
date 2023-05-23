@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.polytech.poubelledroid.fields.LocalNotificationFields;
 import com.polytech.poubelledroid.notificationcenter.Notification;
 import com.polytech.poubelledroid.utils.FirebaseUtils;
 import com.polytech.poubelledroid.utils.NotificationUtils;
@@ -67,17 +68,17 @@ public class FirebaseNotificationService extends FirebaseMessagingService {
 
     private Notification parseNotif(RemoteMessage remoteMessage) {
         Map<String, String> data = remoteMessage.getData();
-        String title = data.get("title");
-        String cleaningRequestId = data.get("cleaningRequestId");
-        String cleanerId = data.get("cleanerId");
-        String trashId = data.get("trashId");
-        String description = data.get("description");
-        String imageUrl = data.get("imageUrl");
+        String title = data.get(LocalNotificationFields.TITLE);
+        String cleaningRequestId = data.get(LocalNotificationFields.CLEANING_REQUEST_ID);
+        String cleanerId = data.get(LocalNotificationFields.CLEANER_ID);
+        String trashId = data.get(LocalNotificationFields.TRASH_ID);
+        String description = data.get(LocalNotificationFields.DESCRIPTION);
+        String imageUrl = data.get(LocalNotificationFields.IMAGE_URL);
 
         Map<String, String> extraInformations = new HashMap<>();
-        extraInformations.put("cleanerId", cleanerId);
-        extraInformations.put("trashId", trashId);
-        extraInformations.put("cleaningRequestId", cleaningRequestId);
+        extraInformations.put(LocalNotificationFields.CLEANER_ID, cleanerId);
+        extraInformations.put(LocalNotificationFields.TRASH_ID, trashId);
+        extraInformations.put(LocalNotificationFields.CLEANING_REQUEST_ID, cleaningRequestId);
 
         Notification notif = new Notification(title, description, imageUrl);
         notif.addExtraInformation(extraInformations);

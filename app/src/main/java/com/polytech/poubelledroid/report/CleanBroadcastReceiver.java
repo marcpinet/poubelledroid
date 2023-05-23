@@ -7,6 +7,9 @@ import android.util.Log;
 import androidx.core.app.NotificationManagerCompat;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.functions.FirebaseFunctions;
+import com.polytech.poubelledroid.fields.ActionFields;
+import com.polytech.poubelledroid.fields.CleaningRequestsFields;
+import com.polytech.poubelledroid.fields.LocalNotificationFields;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,16 +17,16 @@ public class CleanBroadcastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
-        int notificationId = intent.getIntExtra("notification_id", -1);
-        String trashId = intent.getStringExtra("trashId");
-        String cleanerId = intent.getStringExtra("cleanerId");
-        String cleaningRequestId = intent.getStringExtra("cleaningRequestId");
+        int notificationId = intent.getIntExtra(LocalNotificationFields.ID, -1);
+        String trashId = intent.getStringExtra(LocalNotificationFields.TRASH_ID);
+        String cleanerId = intent.getStringExtra(LocalNotificationFields.CLEANER_ID);
+        String cleaningRequestId =
+                intent.getStringExtra(LocalNotificationFields.CLEANING_REQUEST_ID);
 
-        if ("APPROUVER_ACTION".equals(action)) {
+        if (ActionFields.APPROVE_ACTION.equals(action))
             approve(cleaningRequestId, trashId, cleanerId);
-        } else if ("REJETER_ACTION".equals(action)) {
+        else if (ActionFields.REJECT_ACTION.equals(action))
             reject(cleaningRequestId, trashId, cleanerId);
-        }
 
         if (notificationId != -1) {
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
@@ -34,7 +37,7 @@ public class CleanBroadcastReceiver extends BroadcastReceiver {
     public static void checkCleaningRequestStatus(
             String cleaningRequestId, OnStatusCheckedListener listener) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("cleaningRequests")
+        db.collection(CleaningRequestsFields.COLLECTION_NAME)
                 .document(cleaningRequestId)
                 .get()
                 .addOnSuccessListener(

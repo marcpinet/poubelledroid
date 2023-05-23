@@ -2,7 +2,6 @@ package com.polytech.poubelledroid.report;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -26,6 +25,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.polytech.poubelledroid.R;
 import com.polytech.poubelledroid.fields.CleaningRequestsFields;
+import com.polytech.poubelledroid.fields.FirebaseStorageFields;
 import com.polytech.poubelledroid.utils.ImgUtils;
 import java.io.File;
 import java.util.HashMap;
@@ -37,8 +37,8 @@ public class SendCleaned extends AppCompatActivity {
     private ImageView imageView;
     private String currentPhotoPath;
     private com.google.android.material.textfield.TextInputEditText descriptionEditText;
-    private Button postButton;
-    private ProgressDialog progressDialog;
+
+    private AlertDialog loadingDialog;
     private String reporterId;
     private String trashId;
     private String cleanerId;
@@ -47,6 +47,8 @@ public class SendCleaned extends AppCompatActivity {
     @SuppressWarnings("java:S1874")
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        Button postButton;
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_send_cleaned);
 
@@ -67,15 +69,15 @@ public class SendCleaned extends AppCompatActivity {
 
         descriptionEditText = findViewById(R.id.description);
 
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setCancelable(false);
-        progressDialog.setIndeterminate(true);
-        progressDialog.setMessage("Envoi en cours...");
+        AlertDialog.Builder loadingDialogBuilder = new AlertDialog.Builder(this);
+        loadingDialogBuilder.setView(R.layout.dialog_loading);
+        loadingDialog = loadingDialogBuilder.create();
+        loadingDialog.setMessage("Envoi en cours...");
 
-        reporterId = intent.getStringExtra("reporterId");
-        trashId = intent.getStringExtra("trashId");
-        cleanerId = intent.getStringExtra("cleanerId");
-        trashImgUrl = intent.getStringExtra("trashImgUrl");
+        reporterId = intent.getStringExtra(CleaningRequestsFields.REPORTER_ID);
+        trashId = intent.getStringExtra(CleaningRequestsFields.TRASH_ID);
+        cleanerId = intent.getStringExtra(CleaningRequestsFields.CLEANER_ID);
+        trashImgUrl = intent.getStringExtra(CleaningRequestsFields.TRASH_IMG_URL);
     }
 
     private void handlePostButton() {
@@ -87,7 +89,7 @@ public class SendCleaned extends AppCompatActivity {
             return;
         }
 
-        progressDialog.show();
+        loadingDialog.show();
         this.uploadImageAndData();
     }
 
@@ -172,7 +174,8 @@ public class SendCleaned extends AppCompatActivity {
         StorageReference storageReference = FirebaseStorage.getInstance().getReference();
         Uri fileUri = Uri.fromFile(new File(currentPhotoPath));
         StorageReference imageRef =
-                storageReference.child("cleaned/" + fileUri.getLastPathSegment());
+                storageReference.child(
+                        FirebaseStorageFields.CLEANED_STORAGE_PATH + fileUri.getLastPathSegment());
 
         imageRef.putFile(fileUri)
                 .addOnSuccessListener(
@@ -202,8 +205,9 @@ public class SendCleaned extends AppCompatActivity {
                                                             uri.toString());
                                                     cleaningRequest.put(
                                                             CleaningRequestsFields.MESSAGE,
-                                                            descriptionEditText
-                                                                    .getText()
+                                                            Objects.requireNonNull(
+                                                                            descriptionEditText
+                                                                                    .getText())
                                                                     .toString());
                                                     cleaningRequest.put(
                                                             CleaningRequestsFields.STATUS,
@@ -212,7 +216,9 @@ public class SendCleaned extends AppCompatActivity {
                                                             CleaningRequestsFields.DATE,
                                                             FieldValue.serverTimestamp());
 
-                                                    db.collection("cleaningRequests")
+                                                    db.collection(
+                                                                    CleaningRequestsFields
+                                                                            .COLLECTION_NAME)
                                                             .add(cleaningRequest)
                                                             .addOnSuccessListener(
                                                                     documentReference -> {
@@ -223,7 +229,7 @@ public class SendCleaned extends AppCompatActivity {
                                                                                         .ID,
                                                                                 documentReference
                                                                                         .getId());
-                                                                        progressDialog.dismiss();
+                                                                        loadingDialog.dismiss();
 
                                                                         FirebaseFunctions
                                                                                 functions =
@@ -233,23 +239,30 @@ public class SendCleaned extends AppCompatActivity {
                                                                         Map<String, Object> data =
                                                                                 new HashMap<>();
                                                                         data.put(
-                                                                                "reporterId",
+                                                                                CleaningRequestsFields
+                                                                                        .REPORTER_ID,
                                                                                 reporterId);
                                                                         data.put(
-                                                                                "cleanerId",
+                                                                                CleaningRequestsFields
+                                                                                        .CLEANER_ID,
                                                                                 cleanerId);
                                                                         data.put(
-                                                                                "trashId", trashId);
+                                                                                CleaningRequestsFields
+                                                                                        .TRASH_ID,
+                                                                                trashId);
                                                                         data.put(
-                                                                                "description",
+                                                                                CleaningRequestsFields
+                                                                                        .DESCRIPTION,
                                                                                 descriptionEditText
                                                                                         .getText()
                                                                                         .toString());
                                                                         data.put(
-                                                                                "imageUrl",
+                                                                                CleaningRequestsFields
+                                                                                        .IMAGE_URL,
                                                                                 uri.toString());
                                                                         data.put(
-                                                                                "id",
+                                                                                CleaningRequestsFields
+                                                                                        .ID,
                                                                                 documentReference
                                                                                         .getId());
 
@@ -285,7 +298,7 @@ public class SendCleaned extends AppCompatActivity {
                                                                     })
                                                             .addOnFailureListener(
                                                                     e -> {
-                                                                        progressDialog.dismiss();
+                                                                        loadingDialog.dismiss();
                                                                         Toast.makeText(
                                                                                         this,
                                                                                         "Erreur lors de l'envoi de la demande",
@@ -302,7 +315,7 @@ public class SendCleaned extends AppCompatActivity {
                                                                     "Erreur durant l'envoi de la photo vers nos serveurs",
                                                                     Toast.LENGTH_SHORT)
                                                             .show();
-                                                    progressDialog.dismiss();
+                                                    loadingDialog.dismiss();
                                                 }));
     }
 }

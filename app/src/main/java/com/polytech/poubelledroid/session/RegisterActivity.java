@@ -1,12 +1,12 @@
 package com.polytech.poubelledroid.session;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -24,16 +24,16 @@ public class RegisterActivity extends AppCompatActivity {
     private EditText registerEmailEditText;
     private EditText registerPasswordEditText;
     private EditText registerPseudoEditText;
-    private Button registerButton;
-    private TextView loginTextView;
+
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
-    private ProgressDialog progressDialog;
-
-    private static final String USER_TABLE = "users";
+    private AlertDialog loadingDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        TextView loginTextView;
+        Button registerButton;
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
@@ -48,10 +48,10 @@ public class RegisterActivity extends AppCompatActivity {
         registerButton.setOnClickListener(v -> registerUser());
         loginTextView.setOnClickListener(v -> openLoginActivity());
 
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setCancelable(false);
-        progressDialog.setIndeterminate(true);
-        progressDialog.setMessage("Inscription en cours...");
+        AlertDialog.Builder loadingDialogBuilder = new AlertDialog.Builder(this);
+        loadingDialogBuilder.setView(R.layout.dialog_loading);
+        loadingDialog = loadingDialogBuilder.create();
+        loadingDialog.setMessage("Inscription en cours...");
     }
 
     private boolean checkInformations(String email, String password, String pseudo) {
@@ -95,16 +95,16 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
 
-        progressDialog.show();
+        loadingDialog.show();
 
         // Vérifier si l'email ou le pseudo sont déjà utilisés
-        db.collection(USER_TABLE)
+        db.collection(UsersFields.COLLECTION_NAME)
                 .whereEqualTo(UsersFields.EMAIL, email)
                 .get()
                 .addOnCompleteListener(
                         task -> {
                             if (task.isSuccessful() && !task.getResult().isEmpty()) {
-                                progressDialog.dismiss();
+                                loadingDialog.dismiss();
                                 Toast.makeText(
                                                 RegisterActivity.this,
                                                 "Cet email est déjà utilisé",
@@ -113,14 +113,14 @@ public class RegisterActivity extends AppCompatActivity {
                                 return;
                             }
 
-                            db.collection(USER_TABLE)
+                            db.collection(UsersFields.COLLECTION_NAME)
                                     .whereEqualTo(UsersFields.USERNAME, pseudo)
                                     .get()
                                     .addOnCompleteListener(
                                             task2 -> {
                                                 if (task2.isSuccessful()
                                                         && !task2.getResult().isEmpty()) {
-                                                    progressDialog.dismiss();
+                                                    loadingDialog.dismiss();
                                                     Toast.makeText(
                                                                     RegisterActivity.this,
                                                                     "Ce pseudo est déjà utilisé",
@@ -178,7 +178,8 @@ public class RegisterActivity extends AppCompatActivity {
                                                                                             fcmToken);
 
                                                                                     db.collection(
-                                                                                                    USER_TABLE)
+                                                                                                    UsersFields
+                                                                                                            .COLLECTION_NAME)
                                                                                             .document(
                                                                                                     user
                                                                                                             .getUid())
@@ -207,12 +208,12 @@ public class RegisterActivity extends AppCompatActivity {
                                                                                     setResult(
                                                                                             Activity
                                                                                                     .RESULT_OK);
-                                                                                    progressDialog
+                                                                                    loadingDialog
                                                                                             .dismiss();
                                                                                     finish();
                                                                                 });
                                                                     } else {
-                                                                        progressDialog.dismiss();
+                                                                        loadingDialog.dismiss();
                                                                         Toast.makeText(
                                                                                         RegisterActivity
                                                                                                 .this,

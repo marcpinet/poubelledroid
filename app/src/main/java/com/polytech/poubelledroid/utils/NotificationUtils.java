@@ -19,6 +19,8 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 import com.polytech.poubelledroid.Poubelledroid;
 import com.polytech.poubelledroid.R;
+import com.polytech.poubelledroid.fields.ActionFields;
+import com.polytech.poubelledroid.fields.LocalNotificationFields;
 import com.polytech.poubelledroid.googlemaps.MapsActivity;
 import com.polytech.poubelledroid.notificationcenter.Notification;
 import com.polytech.poubelledroid.report.CleanBroadcastReceiver;
@@ -75,10 +77,10 @@ public class NotificationUtils {
 
         NotificationUtils notificationUtils = new NotificationUtils(context);
 
-        notificationUtils.sendNotification_ImgUrl(context, notificationObject, true, true);
+        notificationUtils.sendNotificationWithImgUrl(context, notificationObject, true, true);
     }
 
-    public void sendNotification_ImgUrl(
+    public void sendNotificationWithImgUrl(
             Context context, Notification notif, boolean showDirectly, boolean showButtons) {
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         executorService.execute(
@@ -189,14 +191,18 @@ public class NotificationUtils {
 
         if (showButtons) {
             Intent approuverIntent = new Intent(context, CleanBroadcastReceiver.class);
-            approuverIntent.setAction("APPROUVER_ACTION");
-            approuverIntent.putExtra("notification_id", notif.getId());
-            approuverIntent.putExtra("trashId", String.valueOf(notif.getExtras().get("trashId")));
+            approuverIntent.setAction(ActionFields.APPROVE_ACTION);
+            approuverIntent.putExtra(LocalNotificationFields.ID, notif.getId());
             approuverIntent.putExtra(
-                    "cleanerId", String.valueOf(notif.getExtras().get("cleanerId")));
+                    LocalNotificationFields.TRASH_ID,
+                    String.valueOf(notif.getExtras().get(LocalNotificationFields.TRASH_ID)));
             approuverIntent.putExtra(
-                    "cleaningRequestId",
-                    String.valueOf(notif.getExtras().get("cleaningRequestId")));
+                    LocalNotificationFields.CLEANER_ID,
+                    String.valueOf(notif.getExtras().get(LocalNotificationFields.CLEANER_ID)));
+            approuverIntent.putExtra(
+                    LocalNotificationFields.CLEANING_REQUEST_ID,
+                    String.valueOf(
+                            notif.getExtras().get(LocalNotificationFields.CLEANING_REQUEST_ID)));
             PendingIntent approuverPendingIntent =
                     PendingIntent.getBroadcast(
                             context,
@@ -208,13 +214,18 @@ public class NotificationUtils {
                             .build();
 
             Intent rejeterIntent = new Intent(context, CleanBroadcastReceiver.class);
-            rejeterIntent.setAction("REJETER_ACTION");
-            rejeterIntent.putExtra("notification_id", notif.getId());
-            rejeterIntent.putExtra("trashId", String.valueOf(notif.getExtras().get("trashId")));
-            rejeterIntent.putExtra("cleanerId", String.valueOf(notif.getExtras().get("cleanerId")));
+            rejeterIntent.setAction(ActionFields.REJECT_ACTION);
+            rejeterIntent.putExtra(LocalNotificationFields.ID, notif.getId());
             rejeterIntent.putExtra(
-                    "cleaningRequestId",
-                    String.valueOf(notif.getExtras().get("cleaningRequestId")));
+                    LocalNotificationFields.TRASH_ID,
+                    String.valueOf(notif.getExtras().get(LocalNotificationFields.TRASH_ID)));
+            rejeterIntent.putExtra(
+                    LocalNotificationFields.CLEANER_ID,
+                    String.valueOf(notif.getExtras().get(LocalNotificationFields.CLEANER_ID)));
+            rejeterIntent.putExtra(
+                    LocalNotificationFields.CLEANING_REQUEST_ID,
+                    String.valueOf(
+                            notif.getExtras().get(LocalNotificationFields.CLEANING_REQUEST_ID)));
             PendingIntent rejeterPendingIntent =
                     PendingIntent.getBroadcast(
                             context,
@@ -265,15 +276,18 @@ public class NotificationUtils {
 
         JSONObject jsonObject = new JSONObject();
         try {
-            jsonObject.put("id", notification.getId());
-            jsonObject.put("title", notification.getTitle());
-            jsonObject.put("message", notification.getMessage());
-            jsonObject.put("timestamp", notification.getTimestamp());
+            jsonObject.put(LocalNotificationFields.ID, notification.getId());
+            jsonObject.put(LocalNotificationFields.TITLE, notification.getTitle());
+            jsonObject.put(LocalNotificationFields.MESSAGE, notification.getMessage());
+            jsonObject.put(LocalNotificationFields.TIMESTAMP, notification.getTimestamp());
             if (notification.getImage() != null) {
-                jsonObject.put("image", ImgUtils.bitmapToBase64(notification.getImage()));
+                jsonObject.put(
+                        LocalNotificationFields.IMAGE,
+                        ImgUtils.bitmapToBase64(notification.getImage()));
             }
             if (!notification.getExtras().isEmpty()) {
-                jsonObject.put("extras", new JSONObject(notification.getExtras()));
+                jsonObject.put(
+                        LocalNotificationFields.EXTRAS, new JSONObject(notification.getExtras()));
             }
             jsonArray.put(jsonObject);
         } catch (JSONException e) {

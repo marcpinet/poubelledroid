@@ -118,12 +118,8 @@ public class ZoomableImageView extends AppCompatImageView {
             maxTrans = 0;
         }
 
-        if (trans < minTrans) {
-            return -trans + minTrans;
-        }
-        if (trans > maxTrans) {
-            return -trans + maxTrans;
-        }
+        if (trans < minTrans) return -trans + minTrans;
+        else if (trans > maxTrans) return -trans + maxTrans;
         return 0;
     }
 

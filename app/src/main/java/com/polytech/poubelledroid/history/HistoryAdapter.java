@@ -18,6 +18,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.polytech.poubelledroid.R;
 import com.polytech.poubelledroid.googlemaps.MapsActivity;
 import com.polytech.poubelledroid.report.SendReport;
+import com.polytech.poubelledroid.utils.WasteUtils;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
@@ -111,14 +112,14 @@ public class HistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             GeoPoint wasteLocation = document.getGeoPoint("coordinates");
             if (wasteLocation != null) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
-                    MapsActivity.getAddressFromCoordinatesTiramisu(
+                    WasteUtils.getAddressFromCoordinatesTiramisu(
                             context,
                             wasteLocation.getLatitude(),
                             wasteLocation.getLongitude(),
                             locationName -> wasteViewHolder.wasteLocation.setText(locationName));
                 else
                     wasteViewHolder.wasteLocation.setText(
-                            MapsActivity.getAddressFromCoordinates(
+                            WasteUtils.getAddressFromCoordinates(
                                     getContext(),
                                     wasteLocation.getLatitude(),
                                     wasteLocation.getLongitude()));
@@ -149,7 +150,7 @@ public class HistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     requestLocation -> {
                         if (requestLocation != null) {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                MapsActivity.getAddressFromCoordinatesTiramisu(
+                                WasteUtils.getAddressFromCoordinatesTiramisu(
                                         context,
                                         requestLocation.getLatitude(),
                                         requestLocation.getLongitude(),
@@ -158,7 +159,7 @@ public class HistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                                                         locationName));
                             } else {
                                 requestViewHolder.requestLocation.setText(
-                                        MapsActivity.getAddressFromCoordinates(
+                                        WasteUtils.getAddressFromCoordinates(
                                                 getContext(),
                                                 requestLocation.getLatitude(),
                                                 requestLocation.getLongitude()));

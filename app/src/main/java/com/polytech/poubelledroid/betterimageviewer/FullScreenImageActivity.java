@@ -20,9 +20,7 @@ public class FullScreenImageActivity extends AppCompatActivity {
         ImageView fullScreenImageView = findViewById(R.id.full_screen_image_view);
         String imageUrl = getIntent().getStringExtra("image_url");
 
-        if (imageUrl != null) {
-            Glide.with(this).load(imageUrl).into(fullScreenImageView);
-        }
+        if (imageUrl != null) Glide.with(this).load(imageUrl).into(fullScreenImageView);
 
         fullScreenImageView.setOnClickListener(v -> finish());
     }

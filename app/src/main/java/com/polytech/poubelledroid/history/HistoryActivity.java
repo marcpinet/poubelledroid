@@ -1,7 +1,7 @@
 package com.polytech.poubelledroid.history;
 
 import android.annotation.SuppressLint;
-import android.app.ProgressDialog;
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -14,6 +14,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.polytech.poubelledroid.R;
+import com.polytech.poubelledroid.fields.CleaningRequestsFields;
+import com.polytech.poubelledroid.fields.WasteFields;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -23,7 +25,7 @@ public class HistoryActivity extends AppCompatActivity {
     private final ArrayList<Object> historyItems = new ArrayList<>();
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private final FirebaseAuth mAuth = FirebaseAuth.getInstance();
-    private ProgressDialog progressDialog;
+    private AlertDialog loadingDialog;
     private SwipeRefreshLayout swipeRefreshLayout;
     private String userId;
 
@@ -40,6 +42,12 @@ public class HistoryActivity extends AppCompatActivity {
 
         userId = Objects.requireNonNull(mAuth.getCurrentUser()).getUid();
 
+        AlertDialog.Builder loadingDialogBuilder = new AlertDialog.Builder(this);
+        loadingDialogBuilder.setView(R.layout.dialog_loading);
+        loadingDialog = loadingDialogBuilder.create();
+        loadingDialog.setMessage("Actualisation des déchets en cours...");
+
+        loadingDialog.show();
         loadHistoryData();
 
         historyAdapter = new HistoryAdapter(this, historyItems);
@@ -58,67 +66,71 @@ public class HistoryActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    @SuppressLint("NotifyDataSetChanged")
-    private void loadHistoryData() {
-        // Clear existing data
-        historyItems.clear();
-
-        // Load wastes
-        db.collection("waste")
+    private void loadWastes() {
+        db.collection(WasteFields.COLLECTION_NAME)
                 .whereEqualTo("uid", userId)
                 .get()
                 .addOnCompleteListener(
                         task -> {
                             if (task.isSuccessful()) {
-                                for (QueryDocumentSnapshot document : task.getResult()) {
-                                    historyItems.add(document);
-                                }
+                                historyItems.addAll(task.getResult().getDocuments());
 
-                                // Load cleaning requests
-                                db.collection("cleaningRequests")
-                                        .whereEqualTo("cleanerId", userId)
-                                        .get()
-                                        .addOnCompleteListener(
-                                                task2 -> {
-                                                    if (task2.isSuccessful()) {
-                                                        for (QueryDocumentSnapshot document :
-                                                                task2.getResult()) {
-                                                            historyItems.add(document);
-                                                        }
-
-                                                        // Sort history items by date (descending)
-                                                        historyItems.sort(
-                                                                (o1, o2) -> {
-                                                                    Timestamp date1 =
-                                                                            ((QueryDocumentSnapshot)
-                                                                                            o1)
-                                                                                    .getTimestamp(
-                                                                                            "date");
-                                                                    Timestamp date2 =
-                                                                            ((QueryDocumentSnapshot)
-                                                                                            o2)
-                                                                                    .getTimestamp(
-                                                                                            "date");
-                                                                    return date2.compareTo(date1);
-                                                                });
-
-                                                        historyAdapter.notifyDataSetChanged();
-                                                        swipeRefreshLayout.setRefreshing(false);
-                                                    } else {
-                                                        Log.d(
-                                                                "HistoryActivity",
-                                                                "Error getting cleaning requests: ",
-                                                                task2.getException());
-                                                        swipeRefreshLayout.setRefreshing(false);
-                                                    }
-                                                });
+                                // After loading wastes, load cleaning requests
+                                loadCleaningRequests();
                             } else {
                                 Log.d(
                                         "HistoryActivity",
                                         "Error getting wastes: ",
                                         task.getException());
                                 swipeRefreshLayout.setRefreshing(false);
+                                loadingDialog.dismiss();
                             }
                         });
+    }
+
+    private void loadCleaningRequests() {
+        db.collection(CleaningRequestsFields.COLLECTION_NAME)
+                .whereEqualTo("cleanerId", userId)
+                .get()
+                .addOnCompleteListener(
+                        task -> {
+                            if (task.isSuccessful()) {
+                                historyItems.addAll(task.getResult().getDocuments());
+
+                                // After loading cleaning requests, sort and refresh
+                                sortHistoryItemsAndRefresh();
+                            } else {
+                                Log.d(
+                                        "HistoryActivity",
+                                        "Error getting cleaning requests: ",
+                                        task.getException());
+                                swipeRefreshLayout.setRefreshing(false);
+                                loadingDialog.dismiss();
+                            }
+                        });
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private void sortHistoryItemsAndRefresh() {
+        // Sort history items by date (descending)
+        historyItems.sort(
+                (o1, o2) -> {
+                    Timestamp date1 = ((QueryDocumentSnapshot) o1).getTimestamp("date");
+                    Timestamp date2 = ((QueryDocumentSnapshot) o2).getTimestamp("date");
+                    assert date1 != null && date2 != null;
+                    return date2.compareTo(date1);
+                });
+
+        historyAdapter.notifyDataSetChanged();
+        swipeRefreshLayout.setRefreshing(false);
+        loadingDialog.dismiss();
+    }
+
+    private void loadHistoryData() {
+        // Clear existing data
+        historyItems.clear();
+
+        // Start loading wastes which will then load cleaning requests and sort the history items
+        loadWastes();
     }
 }

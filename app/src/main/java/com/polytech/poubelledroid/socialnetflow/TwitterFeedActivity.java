@@ -1,11 +1,11 @@
 package com.polytech.poubelledroid.socialnetflow;
 
-import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -24,7 +24,7 @@ public class TwitterFeedActivity extends AppCompatActivity {
     private TwitterFeedAdapter mAdapter;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private TextView noTweetsTextView;
-    private ProgressDialog progressDialog;
+    private AlertDialog loadingDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,10 +41,10 @@ public class TwitterFeedActivity extends AppCompatActivity {
 
         noTweetsTextView = findViewById(R.id.no_tweets_text_view);
 
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setCancelable(false);
-        progressDialog.setIndeterminate(true);
-        progressDialog.setMessage("Récupération des tweets...");
+        AlertDialog.Builder loadingDialogBuilder = new AlertDialog.Builder(this);
+        loadingDialogBuilder.setView(R.layout.dialog_loading);
+        loadingDialog = loadingDialogBuilder.create();
+        loadingDialog.setMessage("Récupération des tweets...");
 
         fetchTweets();
     }
@@ -68,7 +68,7 @@ public class TwitterFeedActivity extends AppCompatActivity {
 
     private void fetchTweets() {
         if (!mSwipeRefreshLayout.isRefreshing()) {
-            progressDialog.show();
+            loadingDialog.show();
         }
         new Thread(
                         () -> {
@@ -86,12 +86,12 @@ public class TwitterFeedActivity extends AppCompatActivity {
                                                 mSwipeRefreshLayout.setRefreshing(false);
                                             }
 
-                                            progressDialog.dismiss();
+                                            loadingDialog.dismiss();
                                             updateNoTweetsVisibility();
                                         });
 
                             } catch (IOException e) {
-                                progressDialog.dismiss();
+                                loadingDialog.dismiss();
                                 Toast.makeText(
                                                 TwitterFeedActivity.this,
                                                 "Erreur lors de la récupération des tweets",

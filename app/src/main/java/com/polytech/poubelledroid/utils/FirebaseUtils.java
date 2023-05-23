@@ -13,6 +13,10 @@ import java.util.function.Consumer;
 
 public class FirebaseUtils {
 
+    private FirebaseUtils() {
+        // Private constructor to hide the implicit public one
+    }
+
     public static void getFcmToken(Consumer<String> onTokenReceived) {
         FirebaseMessaging.getInstance()
                 .getToken()
@@ -40,7 +44,8 @@ public class FirebaseUtils {
         }
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        DocumentReference userDocRef = db.collection("users").document(user.getUid());
+        DocumentReference userDocRef =
+                db.collection(UsersFields.COLLECTION_NAME).document(user.getUid());
         userDocRef
                 .get()
                 .addOnCompleteListener(
@@ -97,7 +102,7 @@ public class FirebaseUtils {
         }
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("users")
+        db.collection(UsersFields.COLLECTION_NAME)
                 .document(userId)
                 .update(UsersFields.FCM_TOKEN, token)
                 .addOnSuccessListener(
