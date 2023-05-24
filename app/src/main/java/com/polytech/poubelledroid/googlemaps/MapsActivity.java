@@ -19,6 +19,8 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
@@ -81,9 +83,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Button actusButton;
-        Button snapButton;
-        Button historySettings;
+        ImageView actusButton;
+        ImageView snapButton;
+        ImageView historySettings;
         FloatingActionButton settingsButton;
         FloatingActionButton refreshButton;
 
@@ -93,6 +95,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         assert mapFragment != null;
         mapFragment.getMapAsync(this);
+
+        Animation clickAnimation = AnimationUtils.loadAnimation(this, R.anim.click_anim);
 
         fabNotificationCenter = findViewById(R.id.fab_notification_center);
         fabNotificationCenter.setOnClickListener(
@@ -120,9 +124,21 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         loadingDialog = loadingDialogBuilder.create();
         loadingDialog.setMessage("Actualisation des déchets en cours...");
 
-        actusButton.setOnClickListener(v -> openTwitterActivity());
-        historySettings.setOnClickListener(v -> openHistoryActivity());
-        snapButton.setOnClickListener(v -> openSendReportActivity());
+        actusButton.setOnClickListener(
+                v -> {
+                    v.startAnimation(clickAnimation);
+                    openTwitterActivity();
+                });
+        historySettings.setOnClickListener(
+                v -> {
+                    v.startAnimation(clickAnimation);
+                    openHistoryActivity();
+                });
+        snapButton.setOnClickListener(
+                v -> {
+                    v.startAnimation(clickAnimation);
+                    openSendReportActivity();
+                });
 
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 

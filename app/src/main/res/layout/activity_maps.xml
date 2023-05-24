@@ -63,39 +63,44 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_gravity="bottom"
-        android:background="#3DDC84"
+        android:background="@drawable/border"
         android:showDividers="middle"
         android:divider="?android:attr/dividerHorizontal">
 
-        <Button
+        <ImageView
             android:id="@+id/actus"
-            android:backgroundTint="#3DDC84"
             android:layout_width="wrap_content"
             android:layout_height="60dp"
-            android:text="@string/twitter"
+            android:src="@drawable/twitter_icon"
             android:layout_weight="1"
-            style="?android:attr/buttonBarButtonStyle"
-            android:textColor="?attr/relativeLayoutBackground" />
+            android:scaleType="centerInside"
+            android:padding="8dp"
+            android:layout_marginEnd="1dp"
+            android:background="?attr/colorSecondaryVariant"
+            android:contentDescription="@string/twitter" />
 
-        <Button
+        <ImageView
             android:id="@+id/snap"
-            android:backgroundTint="#3DDC84"
             android:layout_width="wrap_content"
             android:layout_height="60dp"
-            android:text="@string/snap"
+            android:src="@drawable/camera_icon"
             android:layout_weight="1"
-            style="?android:attr/buttonBarButtonStyle"
-            android:textColor="?attr/relativeLayoutBackground" />
+            android:scaleType="centerInside"
+            android:padding="8dp"
+            android:layout_marginEnd="1dp"
+            android:background="?attr/colorSecondaryVariant"
+            android:contentDescription="@string/snap" />
 
-        <Button
+        <ImageView
             android:id="@+id/history"
-            android:backgroundTint="#3DDC84"
             android:layout_width="wrap_content"
             android:layout_height="60dp"
-            android:text="@string/historique"
+            android:src="@drawable/history_icon"
             android:layout_weight="1"
-            style="?android:attr/buttonBarButtonStyle"
-            android:textColor="?attr/relativeLayoutBackground" />
+            android:scaleType="centerInside"
+            android:padding="8dp"
+            android:background="?attr/colorSecondaryVariant"
+            android:contentDescription="@string/historique" />
     </LinearLayout>
 
 </RelativeLayout>

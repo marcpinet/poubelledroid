@@ -8,7 +8,7 @@
 
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/colorPoubelledroid</item>
-        <item name="colorSecondaryVariant">@color/colorPoubelledroid</item>
+        <item name="colorSecondaryVariant">@color/dark</item>
         <item name="colorOnPrimary">@color/white</item>
         <item name="colorOnSecondary">@color/white</item>
 

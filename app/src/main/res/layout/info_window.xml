@@ -36,7 +36,7 @@
 
     <ImageView
         android:id="@+id/imageView_info_window"
-        android:layout_width="200dp"
+        android:layout_width="match_parent"
         android:layout_height="200dp"
         android:layout_below="@+id/layout_title"
         android:layout_centerHorizontal="true"
