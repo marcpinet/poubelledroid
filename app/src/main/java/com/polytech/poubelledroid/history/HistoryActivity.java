@@ -68,7 +68,7 @@ public class HistoryActivity extends AppCompatActivity {
 
     private void loadWastes() {
         db.collection(WasteFields.COLLECTION_NAME)
-                .whereEqualTo("uid", userId)
+                .whereEqualTo(WasteFields.USER_ID, userId)
                 .get()
                 .addOnCompleteListener(
                         task -> {
@@ -90,7 +90,7 @@ public class HistoryActivity extends AppCompatActivity {
 
     private void loadCleaningRequests() {
         db.collection(CleaningRequestsFields.COLLECTION_NAME)
-                .whereEqualTo("cleanerId", userId)
+                .whereEqualTo(CleaningRequestsFields.CLEANER_ID, userId)
                 .get()
                 .addOnCompleteListener(
                         task -> {

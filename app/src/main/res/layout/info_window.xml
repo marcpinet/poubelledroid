@@ -46,12 +46,41 @@
         android:textSize="16sp"
         android:textStyle="italic" />
 
+    <View
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?attr/colorPrimary"
+        android:layout_below="@id/description"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp" />
+
+    <TextView
+        android:id="@+id/distance"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/divider"
+        android:gravity="center_horizontal"
+        android:textSize="16sp"
+        android:textStyle="normal"
+        android:text="Distance : " />
+
+    <TextView
+        android:id="@+id/date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/distance"
+        android:gravity="center_horizontal"
+        android:textSize="16sp"
+        android:textStyle="normal"
+        android:text="Date : " />
+
     <Button
         android:id="@+id/button_clear_marker"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/c_est_nettoy"
-        android:layout_below="@id/description"
+        android:layout_below="@id/date"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="16dp"
         android:backgroundTint="@color/colorPoubelledroid"

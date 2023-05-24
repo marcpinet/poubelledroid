@@ -105,7 +105,7 @@ public class HistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             int type = Objects.requireNonNull(document.getLong("type")).intValue();
             String image = document.getString("image");
             Timestamp timestamp = document.getTimestamp("date");
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
+            SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault());
             String dateText = sdf.format(timestamp.toDate());
             wasteViewHolder.wasteDate.setText(dateText);
 
