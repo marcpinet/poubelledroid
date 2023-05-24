@@ -11,6 +11,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
@@ -44,6 +45,7 @@ import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -61,7 +63,9 @@ import com.polytech.poubelledroid.settings.UserSettings;
 import com.polytech.poubelledroid.socialnetflow.TwitterFeedActivity;
 import com.polytech.poubelledroid.utils.WasteUtils;
 import com.polytech.poubelledroid.utils.geocoder.LocationResultListener;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Objects;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -230,6 +234,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                             Objects.requireNonNull(
                                                             document.getLong(WasteFields.TYPE))
                                                     .intValue();
+                                    Timestamp date = document.getTimestamp(WasteFields.DATE);
 
                                     if (coordinates != null) {
                                         Waste waste =
@@ -241,7 +246,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                                                 coordinates.getLatitude(),
                                                                 coordinates.getLongitude()),
                                                         image,
-                                                        id);
+                                                        id,
+                                                        date);
                                         currentWastes.add(waste);
                                     }
                                 }
@@ -339,6 +345,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         TextView titleTextView = customView.findViewById(R.id.title);
         TextView descriptionTextView = customView.findViewById(R.id.description);
         ImageView closeButton = customView.findViewById(R.id.imageview_close_info_window);
+        TextView textViewDistance = customView.findViewById(R.id.distance);
+        TextView textViewDate = customView.findViewById(R.id.date);
 
         int index = Integer.parseInt(Objects.requireNonNull(marker.getTitle()));
         Waste waste = this.currentWastes.get(index);
@@ -362,6 +370,42 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         Glide.with(this).load(waste.getImageURL()).into(imageViewInfoWindow);
 
         descriptionTextView.setText(waste.getDescription());
+
+        Timestamp creationDate = waste.getDate();
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault());
+        String dateText = sdf.format(creationDate.toDate());
+
+        textViewDate.setText(textViewDate.getText() + dateText);
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            mFusedLocationProviderClient
+                    .getLastLocation()
+                    .addOnSuccessListener(
+                            location -> {
+                                if (location != null) {
+                                    float[] distance = new float[1];
+                                    Location.distanceBetween(
+                                            location.getLatitude(),
+                                            location.getLongitude(),
+                                            waste.getPosition().latitude,
+                                            waste.getPosition().longitude,
+                                            distance);
+
+                                    double metersOrKilometers =
+                                            distance[0] >= 1000 ? distance[0] / 1000 : distance[0];
+                                    String unit = distance[0] >= 1000 ? " km" : " m";
+
+                                    textViewDistance.setText(
+                                            textViewDistance.getText()
+                                                    + String.format(
+                                                            Locale.getDefault(),
+                                                            "%.2f",
+                                                            metersOrKilometers)
+                                                    + unit);
+                                }
+                            });
+        }
 
         imageViewInfoWindow.setOnClickListener(
                 v -> {

@@ -3,6 +3,7 @@ package com.polytech.poubelledroid.googlemaps;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.firebase.Timestamp;
 import com.polytech.poubelledroid.R;
 
 public class Waste {
@@ -13,6 +14,7 @@ public class Waste {
     private final String description;
     private final LatLng position;
     private final String imageURL;
+    private final Timestamp date;
 
     public Waste(
             String id,
@@ -20,7 +22,8 @@ public class Waste {
             String description,
             LatLng position,
             String imageURL,
-            String userId) {
+            String userId,
+            Timestamp date) {
         this.id = id;
         switch (type) {
             case 1:
@@ -41,6 +44,7 @@ public class Waste {
         this.description = description;
         this.imageURL = imageURL;
         this.userId = userId;
+        this.date = date;
     }
 
     public BitmapDescriptor getIcon() {
@@ -82,5 +86,9 @@ public class Waste {
 
     public String getId() {
         return id;
+    }
+
+    public Timestamp getDate() {
+        return date;
     }
 }
