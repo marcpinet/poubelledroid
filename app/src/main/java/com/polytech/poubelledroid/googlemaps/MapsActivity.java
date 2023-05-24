@@ -81,9 +81,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Button actusButton;
-        Button snapButton;
-        Button historySettings;
+        ImageView actusButton;
+        ImageView snapButton;
+        ImageView historySettings;
         FloatingActionButton settingsButton;
         FloatingActionButton refreshButton;
 
