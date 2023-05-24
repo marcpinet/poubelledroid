@@ -1,37 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/layout_info_window"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:padding="16dp"
     android:clickable="true"
     android:focusable="true"
-    android:background="?attr/relativeLayoutBackground">
+    android:background="@drawable/popup_border">
 
-    <TextView
-        android:id="@+id/title"
+    <RelativeLayout
+        android:id="@+id/layout_title"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:textSize="18sp"
-        android:textStyle="bold" />
+        android:layout_height="wrap_content">
 
-    <ImageView
-        android:id="@+id/imageview_close_info_window"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:src="@android:drawable/ic_menu_close_clear_cancel"
-        android:layout_alignParentEnd="true"
-        android:layout_marginEnd="8dp"
-        android:clickable="true"
-        android:focusable="true" />
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_toStartOf="@+id/imageview_close_info_window"
+            android:gravity="center_horizontal"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/imageview_close_info_window"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_alignParentEnd="true"
+            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            android:clickable="true"
+            android:focusable="true" />
+    </RelativeLayout>
 
     <ImageView
         android:id="@+id/imageView_info_window"
         android:layout_width="200dp"
         android:layout_height="200dp"
-        android:layout_below="@id/title"
+        android:layout_below="@+id/layout_title"
         android:layout_centerHorizontal="true"
         android:scaleType="centerCrop"
         android:layout_marginTop="8dp"
