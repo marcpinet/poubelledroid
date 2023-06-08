@@ -6,11 +6,12 @@ Poubelldroid is a school project for the course *IHM* at Polytech Nice Sophia. a
 
 ## 🎥 Demo (censured my home for privacy concerns)
 
-https://github.com/marcpinet/poubelledroid/assets/52708150/63dfb93b-5c0c-40c3-b67f-2074b7091c81
+https://github.com/user-attachments/assets/f87812d3-c284-4a5a-b68a-ae1cb6de17aa
 
-**NOTE:** Demo is not the latest version which includes better aestetic, visuals, settings and much more! (see below)
+> [!NOTE]  
+> Demo is not the latest version which includes better aestetic, visuals, settings and much more! (see below)
 
-![Untitled](https://github.com/marcpinet/poubelledroid/assets/52708150/3a1acbf9-6564-4544-97a0-3a75f7ed7cf3)
+![Untitled](./readme-data/img.png)
 
 ## 💡 How to use
 

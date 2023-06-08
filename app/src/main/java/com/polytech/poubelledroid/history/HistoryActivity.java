@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
+import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -28,6 +29,10 @@ public class HistoryActivity extends AppCompatActivity {
     private AlertDialog loadingDialog;
     private SwipeRefreshLayout swipeRefreshLayout;
     private String userId;
+    private TextView reportedWastesTextView;
+    private TextView cleanedWastesTextView;
+    private TextView submittedRequestsTextView;
+    private TextView approvedRequestsTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +60,13 @@ public class HistoryActivity extends AppCompatActivity {
 
         swipeRefreshLayout = findViewById(R.id.swipe_refresh_layout);
         swipeRefreshLayout.setOnRefreshListener(this::loadHistoryData);
+
+        reportedWastesTextView = findViewById(R.id.reported_wastes);
+        cleanedWastesTextView = findViewById(R.id.cleaned_wastes);
+        submittedRequestsTextView = findViewById(R.id.submitted_requests);
+        approvedRequestsTextView = findViewById(R.id.approved_requests);
+
+        loadStatistics();
     }
 
     @Override
@@ -132,5 +144,45 @@ public class HistoryActivity extends AppCompatActivity {
 
         // Start loading wastes which will then load cleaning requests and sort the history items
         loadWastes();
+    }
+
+    private void loadStatistics() {
+        db.collection(WasteFields.COLLECTION_NAME)
+                .whereEqualTo(WasteFields.USER_ID, userId)
+                .get()
+                .addOnSuccessListener(
+                        queryDocumentSnapshots ->
+                                reportedWastesTextView.setText(
+                                        "\uD83D\uDEA8 Déchets signalés : "
+                                                + queryDocumentSnapshots.size()));
+
+        db.collection(WasteFields.COLLECTION_NAME)
+                .whereEqualTo(WasteFields.USER_ID, userId)
+                .whereEqualTo("cleaned", true)
+                .get()
+                .addOnSuccessListener(
+                        queryDocumentSnapshots ->
+                                cleanedWastesTextView.setText(
+                                        "\uD83D\uDEAE Déchets nettoyés : "
+                                                + queryDocumentSnapshots.size()));
+
+        db.collection(CleaningRequestsFields.COLLECTION_NAME)
+                .whereEqualTo(CleaningRequestsFields.CLEANER_ID, userId)
+                .get()
+                .addOnSuccessListener(
+                        queryDocumentSnapshots ->
+                                submittedRequestsTextView.setText(
+                                        "\uD83E\uDDF9 Nettoyages soumis : "
+                                                + queryDocumentSnapshots.size()));
+
+        db.collection(CleaningRequestsFields.COLLECTION_NAME)
+                .whereEqualTo(CleaningRequestsFields.CLEANER_ID, userId)
+                .whereEqualTo("status", 1)
+                .get()
+                .addOnSuccessListener(
+                        queryDocumentSnapshots ->
+                                approvedRequestsTextView.setText(
+                                        "\uD83E\uDDFC Nettoyages approuvés : "
+                                                + queryDocumentSnapshots.size()));
     }
 }
